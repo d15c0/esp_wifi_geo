@@ -56,7 +56,9 @@ void setup(){
 void loop() {
 
   char bssid[6];
-  DynamicJsonBuffer jsonBuffer;
+//  DynamicJsonBuffer jsonBuffer; //json V5
+  //DynamicJsonDocument pageReturn(1024);
+  StaticJsonDocument<1024> pageReturn;
   Serial.println("scan start");
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
@@ -157,13 +159,28 @@ void loop() {
     if (more_text) {
       Serial.print(line);
     }
-    JsonObject& root = jsonBuffer.parseObject(line);
-    if (root.success()) {
-      latitude    = root["location"]["lat"];
-      longitude   = root["location"]["lng"];
-      accuracy   = root["accuracy"];
-    }
-  }
+    // JSON V5 
+//    JsonObject& root = jsonBuffer.parseObject(line);
+//    if (root.success()) {
+//      latitude    = root["location"]["lat"];
+//      longitude   = root["location"]["lng"];
+//      accuracy   = root["accuracy"];
+//    }
+
+
+
+    DeserializationError jsonerror = deserializeJson(pageReturn, line); 
+    int output = pageReturn["location"]["lat"];
+    if (!jsonerror && output != 0) {
+          latitude = pageReturn["location"]["lat"];
+          longitude = pageReturn["location"]["lng"];
+          accuracy = pageReturn["accuracy"];              
+    }       
+
+  }  
+    
+    
+    
 
   Serial.println();
   Serial.println("closing connection");
